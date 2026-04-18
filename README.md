@@ -4,9 +4,10 @@ A full-stack Task Manager application built with **FastAPI** (backend) and plain
 
 ## 🚀 Live Demo
 
-> _Add your deployment URL here after deploying_
+**🌐 https://fastapi-task-manager-znn3.onrender.com**
 
-API docs available at: `<your-url>/docs`
+- Frontend UI → https://fastapi-task-manager-znn3.onrender.com/
+- API Docs    → https://fastapi-task-manager-znn3.onrender.com/docs
 
 ---
 
@@ -67,16 +68,13 @@ cp backend/.env.example backend/.env
 ## 🖥️ Run Locally
 
 ```bash
-git clone https://github.com/<your-username>/fastapi-task-manager.git
+git clone https://github.com/agniva1803/fastapi-task-manager.git
 cd fastapi-task-manager/backend
 python -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
 cp .env.example .env   # set SECRET_KEY
 uvicorn app.main:app --reload
 ```
-
-- Frontend → http://localhost:8000/
-- API docs → http://localhost:8000/docs
 
 ### Run tests
 
@@ -117,9 +115,27 @@ Query params: `?completed=true/false`, `?page=1&page_size=10`
 
 ---
 
-## 🚢 Deploy to Render
+## 🧪 Running Tests
 
-1. Push repo to GitHub
-2. New Web Service on [render.com](https://render.com)
-3. Root Directory: `backend`, Start Command: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
-4. Add env vars: `SECRET_KEY`, `DATABASE_URL`
+```bash
+cd backend
+pytest tests/ -v
+```
+
+15 tests covering:
+- User registration & login
+- Duplicate username/email validation
+- Full task CRUD
+- Completion toggle
+- Pagination
+- Filtering by status
+- User isolation (can't access other users' tasks)
+- Unauthorized access protection
+
+---
+
+## 🚢 Deployed on Render
+
+Live at: **https://fastapi-task-manager-znn3.onrender.com**
+
+Deployed using [Render](https://render.com) with Docker. The `/docs` endpoint provides interactive Swagger UI for the API.
