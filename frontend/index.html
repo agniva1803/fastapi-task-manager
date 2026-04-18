@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Task Manager</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #0f172a; --surface: #1e293b; --surface2: #273549;
+      --border: #334155; --accent: #6366f1; --accent-hover: #818cf8;
+      --danger: #ef4444; --success: #22c55e; --text: #f1f5f9;
+      --muted: #94a3b8; --radius: 10px;
+    }
+    body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; min-height: 100vh; }
+    #auth-screen { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 1rem; }
+    .auth-box { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 2.5rem; width: 100%; max-width: 400px; }
+    .auth-box h1 { font-size: 1.6rem; margin-bottom: .25rem; }
+    .auth-box p  { color: var(--muted); font-size: .9rem; margin-bottom: 1.75rem; }
+    .tab-row { display: flex; gap: .5rem; margin-bottom: 1.5rem; }
+    .tab { flex: 1; padding: .55rem; border: 1px solid var(--border); background: transparent; color: var(--muted); border-radius: 7px; cursor: pointer; font-size: .9rem; transition: all .2s; }
+    .tab.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+    label { display: block; font-size: .8rem; color: var(--muted); margin-bottom: .35rem; margin-top: .9rem; }
+    input[type=text], input[type=email], input[type=password], textarea { width: 100%; padding: .65rem .85rem; background: var(--bg); border: 1px solid var(--border); border-radius: 7px; color: var(--text); font-size: .95rem; outline: none; transition: border-color .2s; }
+    input:focus, textarea:focus { border-color: var(--accent); }
+    textarea { resize: vertical; min-height: 80px; font-family: inherit; }
+    .btn { display: inline-flex; align-items: center; gap: .4rem; padding: .65rem 1.3rem; border: none; border-radius: 7px; cursor: pointer; font-size: .9rem; font-weight: 600; transition: all .2s; }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { background: var(--accent-hover); }
+    .btn-danger  { background: transparent; color: var(--danger); border: 1px solid var(--danger); }
+    .btn-danger:hover  { background: var(--danger); color: #fff; }
+    .btn-ghost  { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+    .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+    .btn-full { width: 100%; justify-content: center; margin-top: 1.25rem; }
+    .error { color: var(--danger); font-size: .85rem; margin-top: .75rem; min-height: 1.1rem; }
+    #app-screen { display: none; flex-direction: column; min-height: 100vh; }
+    header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 1rem 2rem; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10; }
+    header h2 { font-size: 1.15rem; }
+    .user-chip { display: flex; align-items: center; gap: .75rem; font-size: .85rem; color: var(--muted); }
+    main { flex: 1; padding: 2rem; max-width: 860px; margin: 0 auto; width: 100%; }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; margin-bottom: 1.75rem; }
+    .card h3 { color: var(--muted); text-transform: uppercase; letter-spacing: .06em; font-size: .78rem; margin-bottom: 1rem; }
+    .row { display: flex; gap: .75rem; align-items: flex-end; flex-wrap: wrap; }
+    .row .field { flex: 1; min-width: 160px; }
+    .row .field label { margin-top: 0; }
+    .filters { display: flex; gap: .6rem; margin-bottom: 1.25rem; flex-wrap: wrap; }
+    .filter-btn { padding: .4rem .9rem; border: 1px solid var(--border); background: transparent; color: var(--muted); border-radius: 20px; cursor: pointer; font-size: .85rem; transition: all .2s; }
+    .filter-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(99,102,241,.1); }
+    #task-list { display: flex; flex-direction: column; gap: .75rem; }
+    .task-item { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.1rem 1.25rem; display: flex; align-items: flex-start; gap: 1rem; transition: border-color .2s; }
+    .task-item:hover { border-color: var(--accent); }
+    .task-item.done { opacity: .55; }
+    .task-item.done .task-title { text-decoration: line-through; color: var(--muted); }
+    .check-btn { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--border); background: transparent; cursor: pointer; flex-shrink: 0; margin-top: 2px; transition: all .2s; display: flex; align-items: center; justify-content: center; color: #fff; font-size: .7rem; }
+    .check-btn.checked { background: var(--success); border-color: var(--success); }
+    .task-body { flex: 1; }
+    .task-title { font-weight: 600; margin-bottom: .2rem; }
+    .task-desc { font-size: .85rem; color: var(--muted); }
+    .task-meta { font-size: .75rem; color: var(--border); margin-top: .35rem; }
+    .icon-btn { background: transparent; border: none; cursor: pointer; color: var(--muted); font-size: 1rem; padding: .25rem; border-radius: 5px; transition: color .2s; }
+    .icon-btn:hover { color: var(--danger); }
+    .pagination { display: flex; align-items: center; justify-content: center; gap: .5rem; margin-top: 1.5rem; }
+    .page-btn { width: 34px; height: 34px; border-radius: 7px; border: 1px solid var(--border); background: transparent; color: var(--muted); cursor: pointer; font-size: .85rem; transition: all .2s; }
+    .page-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .page-btn:hover:not(.active) { border-color: var(--accent); color: var(--accent); }
+    .page-info { font-size: .85rem; color: var(--muted); }
+    .empty { text-align: center; color: var(--muted); padding: 3rem 1rem; font-size: .95rem; }
+    .spinner { text-align: center; padding: 2rem; color: var(--muted); }
+    @media(max-width:600px) { header { padding: .75rem 1rem; } main { padding: 1rem; } }
+  </style>
+</head>
+<body>
+
+<div id="auth-screen">
+  <div class="auth-box">
+    <h1>📋 Task Manager</h1>
+    <p>Manage your tasks simply and securely.</p>
+    <div class="tab-row">
+      <button class="tab active" onclick="showTab('login')">Login</button>
+      <button class="tab" onclick="showTab('register')">Register</button>
+    </div>
+    <div id="login-form">
+      <label>Username</label>
+      <input type="text" id="login-username" placeholder="your_username" />
+      <label>Password</label>
+      <input type="password" id="login-password" placeholder="••••••••" />
+      <div class="error" id="login-error"></div>
+      <button class="btn btn-primary btn-full" onclick="login()">Login</button>
+    </div>
+    <div id="register-form" style="display:none">
+      <label>Username</label>
+      <input type="text" id="reg-username" placeholder="your_username" />
+      <label>Email</label>
+      <input type="email" id="reg-email" placeholder="you@email.com" />
+      <label>Password</label>
+      <input type="password" id="reg-password" placeholder="••••••••" />
+      <div class="error" id="reg-error"></div>
+      <button class="btn btn-primary btn-full" onclick="register()">Create Account</button>
+    </div>
+  </div>
+</div>
+
+<div id="app-screen">
+  <header>
+    <h2>📋 Task Manager</h2>
+    <div class="user-chip">
+      <span>👤 <span id="header-username"></span></span>
+      <button class="btn btn-ghost" style="padding:.4rem .8rem;font-size:.8rem" onclick="logout()">Logout</button>
+    </div>
+  </header>
+  <main>
+    <div class="card">
+      <h3>New Task</h3>
+      <div class="row">
+        <div class="field">
+          <label>Title *</label>
+          <input type="text" id="task-title" placeholder="Task title…" />
+        </div>
+        <div class="field">
+          <label>Description</label>
+          <input type="text" id="task-desc" placeholder="Optional description…" />
+        </div>
+        <button class="btn btn-primary" onclick="createTask()" style="margin-bottom:1px">+ Add</button>
+      </div>
+      <div class="error" id="task-error"></div>
+    </div>
+    <div class="filters">
+      <button class="filter-btn active" onclick="setFilter(null, this)">All</button>
+      <button class="filter-btn" onclick="setFilter(false, this)">Pending</button>
+      <button class="filter-btn" onclick="setFilter(true, this)">Completed</button>
+    </div>
+    <div id="task-list"><div class="spinner">Loading…</div></div>
+    <div class="pagination" id="pagination"></div>
+  </main>
+</div>
+
+<script>
+  const API = '';
+  let token = localStorage.getItem('tm_token') || '';
+  let currentUser = localStorage.getItem('tm_user') || '';
+  let currentPage = 1;
+  let currentFilter = null;
+  const PAGE_SIZE = 10;
+
+  window.onload = () => { if (token) showApp(); };
+
+  function showTab(tab) {
+    document.getElementById('login-form').style.display    = tab === 'login'    ? '' : 'none';
+    document.getElementById('register-form').style.display = tab === 'register' ? '' : 'none';
+    document.querySelectorAll('.tab').forEach((b,i) => b.classList.toggle('active', (tab==='login') ? i===0 : i===1));
+    clearErrors();
+  }
+
+  function clearErrors() {
+    ['login-error','reg-error','task-error'].forEach(id => { document.getElementById(id).textContent = ''; });
+  }
+
+  async function apiFetch(path, opts = {}) {
+    const headers = { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) };
+    const res = await fetch(API + path, { ...opts, headers: { ...headers, ...opts.headers } });
+    if (res.status === 204) return null;
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || 'Request failed');
+    return data;
+  }
+
+  async function register() {
+    const username = document.getElementById('reg-username').value.trim();
+    const email    = document.getElementById('reg-email').value.trim();
+    const password = document.getElementById('reg-password').value;
+    try {
+      await apiFetch('/register', { method: 'POST', body: JSON.stringify({ username, email, password }) });
+      await doLogin(username, password);
+    } catch (e) { document.getElementById('reg-error').textContent = e.message; }
+  }
+
+  async function login() {
+    const username = document.getElementById('login-username').value.trim();
+    const password = document.getElementById('login-password').value;
+    try { await doLogin(username, password); }
+    catch(e) { document.getElementById('login-error').textContent = e.message; }
+  }
+
+  async function doLogin(username, password) {
+    const body = new URLSearchParams({ username, password });
+    const res = await fetch(API + '/login', { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.detail || 'Login failed');
+    token = data.access_token; currentUser = username;
+    localStorage.setItem('tm_token', token);
+    localStorage.setItem('tm_user', username);
+    showApp();
+  }
+
+  function logout() {
+    token = ''; currentUser = '';
+    localStorage.removeItem('tm_token'); localStorage.removeItem('tm_user');
+    document.getElementById('app-screen').style.display = 'none';
+    document.getElementById('auth-screen').style.display = 'flex';
+    clearErrors();
+  }
+
+  function showApp() {
+    document.getElementById('auth-screen').style.display = 'none';
+    document.getElementById('app-screen').style.display = 'flex';
+    document.getElementById('header-username').textContent = currentUser;
+    currentPage = 1; loadTasks();
+  }
+
+  async function loadTasks() {
+    document.getElementById('task-list').innerHTML = '<div class="spinner">Loading…</div>';
+    try {
+      let url = `/tasks?page=${currentPage}&page_size=${PAGE_SIZE}`;
+      if (currentFilter !== null) url += `&completed=${currentFilter}`;
+      const data = await apiFetch(url);
+      renderTasks(data);
+    } catch(e) { document.getElementById('task-list').innerHTML = `<div class="empty">Error: ${e.message}</div>`; }
+  }
+
+  function renderTasks({ tasks, total, page, page_size }) {
+    const list = document.getElementById('task-list');
+    if (!tasks.length) { list.innerHTML = '<div class="empty">No tasks yet. Add one above! ✨</div>'; document.getElementById('pagination').innerHTML = ''; return; }
+    list.innerHTML = tasks.map(t => `
+      <div class="task-item ${t.completed ? 'done' : ''}" id="task-${t.id}">
+        <button class="check-btn ${t.completed ? 'checked' : ''}" onclick="toggleTask(${t.id}, ${t.completed})" title="${t.completed ? 'Mark pending' : 'Mark complete'}">${t.completed ? '✓' : ''}</button>
+        <div class="task-body">
+          <div class="task-title">${escHtml(t.title)}</div>
+          ${t.description ? `<div class="task-desc">${escHtml(t.description)}</div>` : ''}
+          <div class="task-meta">#${t.id} &middot; ${t.completed ? '✅ Completed' : '🕐 Pending'}</div>
+        </div>
+        <div><button class="icon-btn" onclick="deleteTask(${t.id})" title="Delete">🗑</button></div>
+      </div>`).join('');
+    renderPagination(total, page, page_size);
+  }
+
+  function renderPagination(total, page, page_size) {
+    const pages = Math.ceil(total / page_size);
+    const pg = document.getElementById('pagination');
+    if (pages <= 1) { pg.innerHTML = ''; return; }
+    let html = `<span class="page-info">${total} tasks</span>`;
+    for (let i = 1; i <= pages; i++) html += `<button class="page-btn ${i===page?'active':''}" onclick="goPage(${i})">${i}</button>`;
+    pg.innerHTML = html;
+  }
+
+  async function createTask() {
+    const title = document.getElementById('task-title').value.trim();
+    const description = document.getElementById('task-desc').value.trim();
+    if (!title) { document.getElementById('task-error').textContent = 'Title is required.'; return; }
+    try {
+      await apiFetch('/tasks', { method: 'POST', body: JSON.stringify({ title, description: description || null }) });
+      document.getElementById('task-title').value = '';
+      document.getElementById('task-desc').value = '';
+      document.getElementById('task-error').textContent = '';
+      loadTasks();
+    } catch(e) { document.getElementById('task-error').textContent = e.message; }
+  }
+
+  async function toggleTask(id, currentlyCompleted) {
+    try { await apiFetch(`/tasks/${id}`, { method: 'PUT', body: JSON.stringify({ completed: !currentlyCompleted }) }); loadTasks(); }
+    catch(e) { alert(e.message); }
+  }
+
+  async function deleteTask(id) {
+    if (!confirm('Delete this task?')) return;
+    try { await apiFetch(`/tasks/${id}`, { method: 'DELETE' }); loadTasks(); }
+    catch(e) { alert(e.message); }
+  }
+
+  function setFilter(val, btn) {
+    currentFilter = val; currentPage = 1;
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    loadTasks();
+  }
+
+  function goPage(p) { currentPage = p; loadTasks(); }
+
+  function escHtml(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key !== 'Enter') return;
+    const authVisible = document.getElementById('auth-screen').style.display !== 'none';
+    if (authVisible && document.getElementById('login-form').style.display !== 'none') login();
+    if (authVisible && document.getElementById('register-form').style.display !== 'none') register();
+  });
+</script>
+</body>
+</html>
