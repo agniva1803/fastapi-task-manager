@@ -1,141 +1,59 @@
-# 📋 FastAPI Task Manager
+# 🀝 FastAPI Task Manager
 
-A full-stack Task Manager application built with **FastAPI** (backend) and plain **HTML/CSS/JavaScript** (frontend).
+[![Python](https://img.shields.io/badge/Python-3.11-3776AB?style=flat-square&logo=python)](https://python.org)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-009688?style=flat-square&logo=fastapi)](https://fastapi.tiangolo.com)
+[![SQLite](https://img.shields.io/badge/SQLite-003B57?style=flat-square&logo=sqlite)](https://sqlite.org)
+[![JWT](https://img.shields.io/badge/Auth-JWT-orange?style=flat-square)](https://jwt.io)
 
-## 🚀 Live Demo
-
-**🌐 https://fastapi-task-manager-znn3.onrender.com**
-
-- Frontend UI → https://fastapi-task-manager-znn3.onrender.com/
-- API Docs    → https://fastapi-task-manager-znn3.onrender.com/docs
+> A production-grade task management REST API with JWT authentication, persistent SQLite storage, and a vanilla JS frontend.
 
 ---
 
 ## ✨ Features
 
-- **JWT Authentication** — register, login, secure token-based sessions
-- **Task CRUD** — create, view, update, delete tasks
-- **Mark as Complete** — toggle task completion status
-- **Pagination** — `?page=1&page_size=10`
-- **Filtering** — `?completed=true|false`
-- **User isolation** — users can only access their own tasks
-- **15 pytest tests** — all passing
-- **Docker** ready
+- βœ… **Full CRUD** β€" Create, read, update, delete tasks
+- πŸ"' **JWT Authentication** β€" Secure register/login flow
+- πŸ'Ύ **SQLite Persistence** β€" Tasks survive server restarts
+- πŸ"– **Auto Docs** β€" Swagger UI at `/docs`, ReDoc at `/redoc`
+- πŸ–₯️ **Vanilla JS Frontend** β€" No framework, pure HTML/CSS/JS
+- ⚑ **FastAPI** β€" Async endpoints, type-safe with Pydantic
 
 ---
 
-## 🏗️ Project Structure
-
-```
-task-manager/
-├── backend/
-│   ├── app/
-│   │   ├── core/         # config.py, security.py
-│   │   ├── db/           # database.py
-│   │   ├── models/       # user.py, task.py (SQLAlchemy)
-│   │   ├── routers/      # auth.py, tasks.py
-│   │   ├── schemas/      # user.py, task.py (Pydantic)
-│   │   └── main.py
-│   ├── tests/
-│   │   └── test_api.py
-│   ├── requirements.txt
-│   └── .env.example
-├── frontend/
-│   └── index.html
-├── Dockerfile
-└── README.md
-```
-
----
-
-## ⚙️ Environment Variables
-
-```bash
-cp backend/.env.example backend/.env
-```
-
-| Variable | Description | Default |
-|---|---|---|
-| `SECRET_KEY` | JWT signing secret — **change this!** | dev fallback |
-| `ALGORITHM` | JWT algorithm | `HS256` |
-| `ACCESS_TOKEN_EXPIRE_MINUTES` | Token lifetime | `30` |
-| `DATABASE_URL` | SQLAlchemy DB URL | `sqlite:///./taskmanager.db` |
-
-> Never commit your `.env` file.
-
----
-
-## 🖥️ Run Locally
+## πŸš€ Quick Start
 
 ```bash
 git clone https://github.com/agniva1803/fastapi-task-manager.git
-cd fastapi-task-manager/backend
-python -m venv venv && source venv/bin/activate
+cd fastapi-task-manager
 pip install -r requirements.txt
-cp .env.example .env   # set SECRET_KEY
-uvicorn app.main:app --reload
-```
-
-### Run tests
-
-```bash
-cd backend
-pytest tests/ -v
+uvicorn main:app --reload
+# API: http://localhost:8000
+# Docs: http://localhost:8000/docs
 ```
 
 ---
 
-## 🐳 Docker
+## πŸ"' API Endpoints
 
-```bash
-docker build -t task-manager .
-docker run -p 8000:8000 -e SECRET_KEY=your-secret task-manager
-```
-
----
-
-## 📡 API Reference
-
-### Auth
-| Method | Endpoint | Description |
-|---|---|---|
-| `POST` | `/register` | Create account |
-| `POST` | `/login` | Get JWT token |
-
-### Tasks (Bearer token required)
-| Method | Endpoint | Description |
-|---|---|---|
-| `POST` | `/tasks` | Create task |
-| `GET` | `/tasks` | List tasks (paginated) |
-| `GET` | `/tasks/{id}` | Get task |
-| `PUT` | `/tasks/{id}` | Update task |
-| `DELETE` | `/tasks/{id}` | Delete task |
-
-Query params: `?completed=true/false`, `?page=1&page_size=10`
+| Method | Endpoint | Auth | Description |
+|--------|----------|------|-------------|
+| POST | `/auth/register` | ❌ | Register user |
+| POST | `/auth/login` | ❌ | Login, get JWT |
+| GET | `/tasks` | βœ… | List all tasks |
+| POST | `/tasks` | βœ… | Create task |
+| PUT | `/tasks/{id}` | βœ… | Update task |
+| DELETE | `/tasks/{id}` | βœ… | Delete task |
 
 ---
 
-## 🧪 Running Tests
+## πŸ—οΈ Tech Stack
 
-```bash
-cd backend
-pytest tests/ -v
-```
-
-15 tests covering:
-- User registration & login
-- Duplicate username/email validation
-- Full task CRUD
-- Completion toggle
-- Pagination
-- Filtering by status
-- User isolation (can't access other users' tasks)
-- Unauthorized access protection
+`Python` `FastAPI` `SQLite` `SQLAlchemy` `JWT` `Pydantic` `Uvicorn`
 
 ---
 
-## 🚢 Deployed on Render
+## πŸ'¨β€πŸ'» Author
 
-Live at: **https://fastapi-task-manager-znn3.onrender.com**
+**Agniva Mukherjee** β€" [GitHub](https://github.com/agniva1803) Β· [LinkedIn](https://www.linkedin.com/in/agniva-mukherjee-b2647b21a)
 
-Deployed using [Render](https://render.com) with Docker. The `/docs` endpoint provides interactive Swagger UI for the API.
+MIT Β© 2024 Agniva Mukherjee
